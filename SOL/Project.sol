@@ -4,7 +4,7 @@ import "./SafeMath.sol";
 
 
 contract SharesTokenInterface {
-	function createShare(string _title, uint maxim) external returns(uint);
+	function createShare(string _title, uint maxim, uint check) external returns(uint);
 	function getTitle(uint _tokenId) external view returns(string);
 	function isReady(uint _tokenId) public view returns(bool);
 	function isClean(uint _tokenId) public view returns(bool);
@@ -16,7 +16,8 @@ contract SharesTokenInterface {
 	function transfer(uint _tokenId, address _to, uint _value) external returns (bool);
 	function acceptDividends(uint _tokenId) payable external;
 
-	event AcceptDividends(uint indexed tokenId, uint256 value);
+	event ShareCreated(uint indexed tokenId, uint check);
+    event AcceptDividends(uint indexed tokenId, uint256 value);
 	event Transfer(uint indexed tokenId, address indexed from, address indexed to, uint value);
 }
 
@@ -39,12 +40,13 @@ contract SharesToken is SharesTokenInterface {
 	mapping(uint => Share) internal allshares;
 	
 	
-	function createShare(string _title, uint maxim) external returns(uint) {
+	function createShare(string _title, uint maxim, uint check) external returns(uint) {
 		shares_count++;
 		uint _tokenId = shares_count;
 		allshares[_tokenId].title = _title;
 		allshares[_tokenId].totalSupply = maxim;
 		allshares[_tokenId].ready = 0;
+		emit ShareCreated(_tokenId, check);
 		return _tokenId;
 	}
 	
@@ -158,11 +160,11 @@ contract SharesToken is SharesTokenInterface {
 		Share storage cur = allshares[_tokenId];
 		uint forSingle = msg.value / cur.totalSupply;
 		for (uint i = 0; i < cur.membersCount; i++) {
-			address this_member = cur.members[i];
-			uint this_coins = cur.balances[this_member] * forSingle;
-			if (this_coins > 0) {
-				this_member.transfer(this_coins);
-			}
+		    address this_member = cur.members[i];
+		    uint this_coins = cur.balances[this_member] * forSingle;
+		    if (this_coins > 0) {
+		        this_member.transfer(this_coins);
+		    }
 		}
 		
 		uint back = msg.value - forSingle * cur.totalSupply;
