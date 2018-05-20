@@ -21,18 +21,31 @@ contract SharesToken is SharesTokenInterface {
 	mapping(uint => uint) internal membersCount;
 	mapping(uint => mapping(address => uint)) internal balances;
 	mapping(uint => uint) internal totalSupply_;
-	mapping(uint => uint) internal ready_;
+	mapping(uint => uint) internal ready;
+	mapping(uint => uint) internal maxSingleTransfer;
+	mapping(uint => uint) internal maxTotalBalance;
 	
 	
 	function createToken(uint256 _tokenId, uint maxim) external returns (bool) {
 	    totalSupply_[_tokenId] = maxim;
-	    ready_[_tokenId] = 0;
+	    ready[_tokenId] = 0;
+	}
+	
+	function addMaxSingleTransfer(uint256 _tokenId, uint value) external {
+	    maxSingleTransfer[_tokenId] = value;
+	}
+	
+	function addMaxTotalBalance(uint256 _tokenId, uint value) external {
+	    maxTotalBalance[_tokenId] = value;
 	}
 	
 	function addMember(uint256 _tokenId, address user, uint value) external {
-	    require(ready_[_tokenId] + value <= totalSupply_[_tokenId]);
+	    require(ready[_tokenId] + value <= totalSupply_[_tokenId]);
+	    if (maxTotalBalance[_tokenId] > 0)
+	        require(balances[_tokenId][user] + value <= maxTotalBalance[_tokenId]);
+	    
 	    balances[_tokenId][user] += value;
-	    ready_[_tokenId] += value;
+	    ready[_tokenId] += value;
 	    members[_tokenId] = msg.sender;
 	    membersCount[_tokenId]++;
 	}
@@ -67,11 +80,6 @@ contract SharesToken is SharesTokenInterface {
 	function transfer(uint _tokenId, address _to, uint _value) external returns (bool) {
 		return transfer_(_tokenId, msg.sender, _to, _value);
 	}
-	
-	function checkit() internal view returns (bool) {
-	    return true;
-	}
-
 
 	/**
 	* @dev Transfer tokens from one address to another
@@ -82,7 +90,11 @@ contract SharesToken is SharesTokenInterface {
 	*/
 	function transfer_(uint _tokenId, address _from, address _to, uint _value) internal returns (bool) {
 		require(_from != _to);
-		require(checkit());
+		if (maxSingleTransfer[_tokenId] > 0)
+		    require(_value <= maxSingleTransfer[_tokenId]);
+        if (maxTotalBalance[_tokenId] > 0)
+		    require(_value <= maxTotalBalance[_tokenId]);
+		
 		mapping(address => uint) _balances = balances[_tokenId];
 		uint _bfrom = _balances[_from];
 		uint _bto = _balances[_to];
