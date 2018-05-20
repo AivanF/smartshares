@@ -6,6 +6,7 @@ import "./SafeMath.sol";
 contract SharesTokenInterface {
     function createShare(string _title, uint maxim) external returns(uint);
     function isReady(uint256 _tokenId) public view returns(bool);
+    function isClean(uint256 _tokenId) public view returns(bool);
     function addMember(uint256 _tokenId, address user, uint value) external returns(bool);
 	function totalSupply(uint256 _tokenId) external view returns (uint256);
 	function balanceOf(uint256 _tokenId, address _owner) external view returns (uint256);
@@ -35,8 +36,8 @@ contract SharesToken is SharesTokenInterface {
 	
 	
 	function createShare(string _title, uint maxim) external returns(uint) {
-	    uint256 _tokenId = shares_count;
 	    shares_count++;
+	    uint256 _tokenId = shares_count;
 	    allshares[_tokenId].title = _title;
 	    allshares[_tokenId].totalSupply = maxim;
 	    allshares[_tokenId].ready = 0;
@@ -47,18 +48,31 @@ contract SharesToken is SharesTokenInterface {
 	    return (allshares[_tokenId].ready == allshares[_tokenId].totalSupply);
 	}
 	
-	function addMaxSingleTransfer(uint256 _tokenId, uint value) external {
-	    allshares[_tokenId].maxSingleTransfer = value;
+	function isClean(uint256 _tokenId) public view returns(bool) {
+	    return (allshares[_tokenId].ready == 0);
 	}
 	
-	function addMaxTotalBalance(uint256 _tokenId, uint value) external {
+	function addMaxSingleTransfer(uint256 _tokenId, uint value) external returns(bool) {
+	    require(isClean(_tokenId));
+	    allshares[_tokenId].maxSingleTransfer = value;
+	    return true;
+	}
+	
+	function addMaxTotalBalance(uint256 _tokenId, uint value) external returns(bool) {
+		require(isClean(_tokenId));
 	    allshares[_tokenId].maxTotalBalance = value;
+	    return true;
 	}
 	
 	function addMember(uint256 _tokenId, address user, uint value) external returns(bool) {
+	    return addMember_(_tokenId, user, value);
+	}
+	
+	function addMember_(uint256 _tokenId, address user, uint value) internal returns(bool) {
 	    require(allshares[_tokenId].ready + value <= allshares[_tokenId].totalSupply);
 	    if (allshares[_tokenId].maxTotalBalance > 0)
-	        require(allshares[_tokenId].balances[user] + value <= allshares[_tokenId].maxTotalBalance);
+	        if (allshares[_tokenId].balances[user] + value > allshares[_tokenId].maxTotalBalance)
+	            return false;
 	    
 	    allshares[_tokenId].balances[user] += value;
 	    allshares[_tokenId].ready += value;
