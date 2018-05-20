@@ -4,12 +4,13 @@ import "./SafeMath.sol";
 
 
 contract SharesTokenInterface {
-    function createToken(uint256 _tokenId) external returns (bool);
-    function addMember(uint256 _tokenId, address user, uint value) external;
+    function createShare(string _title, uint maxim) external returns(uint);
+    function isReady(uint256 _tokenId) public view returns(bool);
+    function addMember(uint256 _tokenId, address user, uint value) external returns(bool);
 	function totalSupply(uint256 _tokenId) external view returns (uint256);
 	function balanceOf(uint256 _tokenId, address _owner) external view returns (uint256);
 	function transfer(uint256 _tokenId, address _to, uint256 _value) external returns (bool);
-	function invest(uint256 _tokenId) payable external;
+// 	function invest(uint256 _tokenId) payable external;
 
 	event Transfer(uint256 indexed tokenId, address indexed from, address indexed to, uint256 value);
 }
@@ -17,37 +18,53 @@ contract SharesTokenInterface {
 contract SharesToken is SharesTokenInterface {
 	using SafeMath for uint;
 	
-	mapping(uint => address) internal members;
-	mapping(uint => uint) internal membersCount;
-	mapping(uint => mapping(address => uint)) internal balances;
-	mapping(uint => uint) internal totalSupply_;
-	mapping(uint => uint) internal ready;
-	mapping(uint => uint) internal maxSingleTransfer;
-	mapping(uint => uint) internal maxTotalBalance;
+	struct Share {
+	    string title;
+	    uint totalSupply;
+	    uint ready;
+	    uint membersCount;
+	    mapping(uint => address) members;
+	    mapping(address => uint) balances;
+	    
+	    uint maxSingleTransfer;
+	    uint maxTotalBalance;
+	}
+	
+	uint internal shares_count = 0;
+	mapping(uint => Share) internal allshares;
 	
 	
-	function createToken(uint256 _tokenId, uint maxim) external returns (bool) {
-	    totalSupply_[_tokenId] = maxim;
-	    ready[_tokenId] = 0;
+	function createShare(string _title, uint maxim) external returns(uint) {
+	    uint256 _tokenId = shares_count;
+	    shares_count++;
+	    allshares[_tokenId].title = _title;
+	    allshares[_tokenId].totalSupply = maxim;
+	    allshares[_tokenId].ready = 0;
+	    return _tokenId;
+	}
+	
+	function isReady(uint256 _tokenId) public view returns(bool) {
+	    return (allshares[_tokenId].ready == allshares[_tokenId].totalSupply);
 	}
 	
 	function addMaxSingleTransfer(uint256 _tokenId, uint value) external {
-	    maxSingleTransfer[_tokenId] = value;
+	    allshares[_tokenId].maxSingleTransfer = value;
 	}
 	
 	function addMaxTotalBalance(uint256 _tokenId, uint value) external {
-	    maxTotalBalance[_tokenId] = value;
+	    allshares[_tokenId].maxTotalBalance = value;
 	}
 	
-	function addMember(uint256 _tokenId, address user, uint value) external {
-	    require(ready[_tokenId] + value <= totalSupply_[_tokenId]);
-	    if (maxTotalBalance[_tokenId] > 0)
-	        require(balances[_tokenId][user] + value <= maxTotalBalance[_tokenId]);
+	function addMember(uint256 _tokenId, address user, uint value) external returns(bool) {
+	    require(allshares[_tokenId].ready + value <= allshares[_tokenId].totalSupply);
+	    if (allshares[_tokenId].maxTotalBalance > 0)
+	        require(allshares[_tokenId].balances[user] + value <= allshares[_tokenId].maxTotalBalance);
 	    
-	    balances[_tokenId][user] += value;
-	    ready[_tokenId] += value;
-	    members[_tokenId] = msg.sender;
-	    membersCount[_tokenId]++;
+	    allshares[_tokenId].balances[user] += value;
+	    allshares[_tokenId].ready += value;
+	    allshares[_tokenId].members[allshares[_tokenId].membersCount] = msg.sender;
+	    allshares[_tokenId].membersCount++;
+	    return true;
 	}
 
  
@@ -57,7 +74,7 @@ contract SharesToken is SharesTokenInterface {
 	* @return representing the total amount of tokens
 	*/
 	function totalSupply(uint _tokenId) external view returns (uint) {
-		return totalSupply_[_tokenId];
+		return allshares[_tokenId].totalSupply;
 	}
 
 	/**
@@ -67,7 +84,7 @@ contract SharesToken is SharesTokenInterface {
 	* @return representing the amount owned by the passed address
 	*/
 	function balanceOf(uint _tokenId, address _owner) external view returns (uint) {
-		return balances[_tokenId][_owner];
+		return allshares[_tokenId].balances[_owner];
 	}
 
 
@@ -90,12 +107,13 @@ contract SharesToken is SharesTokenInterface {
 	*/
 	function transfer_(uint _tokenId, address _from, address _to, uint _value) internal returns (bool) {
 		require(_from != _to);
-		if (maxSingleTransfer[_tokenId] > 0)
-		    require(_value <= maxSingleTransfer[_tokenId]);
-        if (maxTotalBalance[_tokenId] > 0)
-		    require(_value <= maxTotalBalance[_tokenId]);
+		require(isReady(_tokenId));
+		if (allshares[_tokenId].maxSingleTransfer > 0)
+		    require(_value <= allshares[_tokenId].maxSingleTransfer);
+        if (allshares[_tokenId].maxTotalBalance > 0)
+		    require(_value <= allshares[_tokenId].maxTotalBalance);
 		
-		mapping(address => uint) _balances = balances[_tokenId];
+		mapping(address => uint) _balances = allshares[_tokenId].balances;
 		uint _bfrom = _balances[_from];
 		uint _bto = _balances[_to];
 		require(_to != address(0));
