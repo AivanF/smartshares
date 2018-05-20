@@ -1,63 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Smart Shares</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Smart Shares</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
 
-    <link rel="stylesheet" href="main.css"/>
+	<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+
+	<link rel="stylesheet" href="main.css"/>
 </head>
 <body>
 <div class="container-fluid">
-    <!-- Table of content -->
-    <div class="col-xs-2 menu-left">
-        <div class="col-xs-12 text-center menu-left-header">
-            <h3>Smart Shares <span class="glyphicon glyphicon-ok"></span></h3>
-        </div>
+	<!-- Table of content -->
+	<div class="col-xs-2 menu-left">
+		<div class="col-xs-12 text-center menu-left-header">
+			<h3>Smart Shares <span class="glyphicon glyphicon-ok"></span></h3>
+		</div>
 
-        <div class="col-xs-12 text-center" style="padding-bottom: 8px;">
-            <span class="glyphicon glyphicon-user"></span>
-            UserName
-        </div>
+		<div class="col-xs-12 text-center" style="padding-bottom: 8px;">
+			<span class="glyphicon glyphicon-user"></span>
+			UserName
+		</div>
 
-        <div class="col-xs-12 menu-left-content">
-            <ul>
-                <li><a class="link-white" href="">
-                    <span class="glyphicon glyphicon-th-list"></span>
-                    Создать
-                </a></li>
-            </ul>
-        </div>
-    </div>
+		<div class="col-xs-12 menu-left-content">
+			<ul>
+				<li><a class="link-white" href="">
+					<span class="glyphicon glyphicon-th-list"></span>
+					Создать
+				</a></li>
+			</ul>
+		</div>
+	</div>
 
-    <!-- Page data -->
-    <div class="col-xs-10 page-main">
-        <div id="blind">
-            <div class="blind-inner col-xs-12 text-center">
-                <div class="loader"></div>
-            </div>
-        </div>
+	<!-- Page data -->
+	<div class="col-xs-10 page-main">
+		<div id="blind">
+			<div class="blind-inner col-xs-12 text-center">
+				<div class="loader"></div>
+			</div>
+		</div>
 
-        <div style="width: 100%;">
-            <div class="col-xs-12 text-center page-main-header">
-                <h2>Создание акционного договора</h2>
-            </div>
+		<div style="width: 100%;">
+			<div class="col-xs-12 text-center page-main-header">
+				<h2>Создание акционного договора</h2>
+			</div>
 
-            <!--  -->
-        </div>
+			<div class="col-xs-12 col-md-6">
+				<div class="col-xs-12">
+					<br>
+					Введетие название:
+				</div>
+				<div class="col-xs-12">
+					<input id="name" class="col-xs-12" type="text" value="Test-1">
+				</div>
+			</div>
 
-        <script type="text/javascript">
-            //
-        </script>
-    </div><!-- col-xs-10 page-main -->
+			<div class="col-xs-12 col-md-6">
+				<div class="col-xs-12">
+					<br>
+					Количество всех акций:
+				</div>
+				<div class="col-xs-12">
+					<input id="maxim" class="col-xs-12" type="number" value="100">
+				</div>
+			</div>
+
+			<div id="block_maxTotalBalance" class="col-xs-12 col-md-6" style="opacity: 0.6;">
+				<div class="col-xs-12">
+					<br>
+					Максимальное количество акций на одного человека:
+				</div>
+				<div class="col-xs-12">
+					<input id="maxTotalBalance" class="col-xs-12" type="number" value="80">
+				</div>
+				<div class="col-xs-12">
+					<label class="checkbox-inline">
+						<input id="use_maxTotalBalance" type="checkbox" onclick="handle_check('maxTotalBalance');">
+						Использовать правило
+					</label>
+				</div>
+			</div>
+
+			<div id="block_maxSingleTransfer" class="col-xs-12 col-md-6" style="opacity: 0.6;">
+				<div class="col-xs-12">
+					<br>
+					Максимальное количество переводимых за раз акций:
+				</div>
+				<div class="col-xs-12">
+					<input id="maxSingleTransfer" class="col-xs-12" type="number" value="10">
+				</div>
+				<div class="col-xs-12">
+					<label class="checkbox-inline">
+						<input id="use_maxSingleTransfer" type="checkbox" onclick="handle_check('maxSingleTransfer');">
+						Использовать правило
+					</label>
+				</div>
+			</div>
+
+			<div class="col-xs-12 text-center">
+				<br>
+				<br>
+				<div class="btn-group">
+					<button type="button" class="btn btn-primary" onclick="handle_create();">
+						Создать контракт
+					</button>
+				</div>
+			</div>
+
+			<div class="col-xs-12 text-center">
+				<br>
+				<br>
+				<div id="result"></div>
+				<br>
+				<br>
+				<br>
+				<br>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			function getRandomInt(max) { return Math.floor(Math.random() * Math.floor(max)); }
+
+			function debugit(value, label) {
+				if (label) label += ': '; else label = '';
+				console.log(label + value + ' (' + (typeof value) + ')');
+			}
+
+			const ABI = [{"constant": false,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "acceptDividends","outputs": [],"payable": true,"stateMutability": "payable","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "_owner","type": "address"}],"name": "balanceOf","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "ind","type": "uint256"}],"name": "getMember","outputs": [{"name": "","type": "address"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "isReady","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": false,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "value","type": "uint256"}],"name": "addMaxSingleTransfer","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [{"name": "_title","type": "string"},{"name": "maxim","type": "uint256"},{"name": "check","type": "uint256"}],"name": "createShare","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "getTitle","outputs": [{"name": "","type": "string"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "isClean","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "getMembersCount","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": true,"inputs": [{"name": "_tokenId","type": "uint256"}],"name": "totalSupply","outputs": [{"name": "","type": "uint256"}],"payable": false,"stateMutability": "view","type": "function"},{"constant": false,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "user","type": "address"},{"name": "value","type": "uint256"}],"name": "addMember","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "value","type": "uint256"}],"name": "addMaxTotalBalance","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [{"name": "_tokenId","type": "uint256"},{"name": "_to","type": "address"},{"name": "_value","type": "uint256"}],"name": "transfer","outputs": [{"name": "","type": "bool"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"anonymous": false,"inputs": [{"indexed": true,"name": "tokenId","type": "uint256"},{"indexed": false,"name": "check","type": "uint256"}],"name": "ShareCreated","type": "event"},{"anonymous": false,"inputs": [{"indexed": true,"name": "tokenId","type": "uint256"},{"indexed": false,"name": "value","type": "uint256"}],"name": "AcceptDividends","type": "event"},{"anonymous": false,"inputs": [{"indexed": true,"name": "tokenId","type": "uint256"},{"indexed": true,"name": "from","type": "address"},{"indexed": true,"name": "to","type": "address"},{"indexed": false,"name": "value","type": "uint256"}],"name": "Transfer","type": "event"}];
+			
+			var contractAddress = '0xa02ed0409d0cf6f3a78670075cc34934a96d44f4';
+			var $blind = $('#blind');
+			var $result = $("#result");
+			var contract, contractInstance;
+			var checker = null;
+
+			function clean() {
+				$result.html('');
+			}
+
+			function write(txt) {
+				$result.html($result.html() + txt + '<br>');
+			}
+
+			window.addEventListener('load', function() {
+				window.web3 = new Web3(web3.currentProvider);
+				contract = web3.eth.contract(ABI);
+				contractInstance = contract.at(contractAddress);
+				// console.log(contractInstance);
+
+				var ShareCreated = contractInstance.ShareCreated({},{fromBlock: 0, toBlock: 'latest'});
+				ShareCreated.watch(function(error, result){
+					if (result.args.check.c[0] == checker) {
+						process_created(result.args.tokenId.c[0]);
+					}
+				});
+
+				var ShareCreated = contractInstance.ShareCreated({},{fromBlock: 0, toBlock: 'latest'});
+				ShareCreated.watch(function(error, result){
+					if (result.args.check.c[0] == checker) {
+						process_created(result.args.tokenId.c[0]);
+					}
+				});
+			});
+
+			function genback(label) {
+				let saved = label;
+				return function (error, result) {
+					console.log(label + ': ' + error + ', ' + result);
+					if (error) {
+						write(label + '... Ошибка!');
+					} else {
+						write(label + '... Готово.');
+					}
+				};
+			}
+
+			function generror(label) {
+				let saved = label;
+				return function (error, result) {
+					if (error) {
+						console.log(label + '... Ошибка!');
+					} else {
+						write(label + '... Готово.');
+					}
+				};
+			}
+
+			function deback(error, result){
+				debugit(error, 'error');
+				debugit(result, 'result');
+			}
+
+			function process_created(tokenId) {
+				$blind.hide();
+				write('Создано соглашение #' + tokenId);
+				let maxSingleTransfer = null;
+				if ($('#use_maxSingleTransfer').is(":checked")) {
+					maxSingleTransfer = $('#maxTotalBalance').val();
+				}
+				debugit(maxSingleTransfer, 'maxSingleTransfer');
+				if (maxSingleTransfer) {
+					contractInstance.addMaxSingleTransfer.sendTransaction(
+						tokenId,
+						maxSingleTransfer,
+						genback('Установка ограничение на передачи акций')
+					);
+				}
+				let maxTotalBalance = null;
+				if ($('#use_maxTotalBalance').is(":checked")) {
+					maxTotalBalance = $('#maxTotalBalance').val();
+				}
+				debugit(maxTotalBalance, 'maxTotalBalance');
+				if (maxTotalBalance) {
+					contractInstance.addMaxTotalBalance.sendTransaction(
+						tokenId,
+						maxTotalBalance,
+						genback('Установка ограничения на владение акций')
+					);
+				}
+			}
+
+			function handle_create() {
+				let name = $('#name').val();
+				let maxim = $('#maxim').val();
+
+				clean();
+				write('Название: ' + name);
+				write('Количество акций: ' + maxim);
+				$blind.show();
+
+				// setTimeout(function(){
+				// 	$result.html('<u>Ahah!</u>');
+				// 	$blind.hide()
+				// }, 1000);
+
+				checker = getRandomInt(1234);
+				contractInstance.createShare.sendTransaction(name, maxim, checker, generror);
+			}
+
+			function handle_check(name) {
+				let $block = $("#block_" + name);
+				let $check = $("#use_" + name);
+				if ($check.is(":checked")) {
+					$block.css('opacity', '1');
+				} else {
+					$block.css('opacity', '0.6');
+				}
+			}
+		</script>
+	</div><!-- col-xs-10 page-main -->
 
 </div><!-- container-fluid -->
 </body>
